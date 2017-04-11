@@ -12,4 +12,5 @@
     <string name="subtitle_format">%1$s crimes</string>
 
     <string name="deleteAll">deleteAll</string>
+    <string name="delete_crime">delete crime</string>
 </resources>
