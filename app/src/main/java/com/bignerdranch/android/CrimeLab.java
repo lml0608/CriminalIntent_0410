@@ -54,6 +54,13 @@ public class CrimeLab {
     }
 
 
+    //删除所有的数据
+    public void deleteCrimes() {
+
+        mDatabase.delete(CrimeTable.NAME, null,null);
+    }
+
+
 
     //返回查询出来的所有crime对象
     private CrimeCursorWrapper queryCrime(String whereClause, String[] whereArgs) {

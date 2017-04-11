@@ -67,6 +67,7 @@ public class CrimeListFragment extends Fragment {
 
             mCrimeRecyclerView.setAdapter(mCrimeAdapter);
         } else {
+            mCrimeAdapter.setCrimes(crimes);
             if (mLastAdapterClickPosition < 0) {
                 mCrimeAdapter.notifyDataSetChanged();
             } else {
@@ -109,7 +110,7 @@ public class CrimeListFragment extends Fragment {
 
             mLastAdapterClickPosition = getAdapterPosition();
             //跳转到详情页， intent需要传递id
-            Intent intent = CrimeActivity.newIntent(getActivity(), mCrime.getId());
+            Intent intent = CrimePagerActivity.newIntent(getActivity(), mCrime.getId());
 
 
             startActivity(intent);
@@ -146,6 +147,10 @@ public class CrimeListFragment extends Fragment {
             //返回mCrimes长度
             return mCrimes.size();
         }
+
+        public void setCrimes(List<Crime> crimes) {
+            mCrimes = crimes;
+        }
     }
 
     @Override
@@ -165,6 +170,10 @@ public class CrimeListFragment extends Fragment {
                 Crime crime = new Crime();
                 CrimeLab.get(getActivity()).addCrime(crime);
 
+                updateUI();
+                return true;
+            case R.id.menu_item_delete_crime:
+                CrimeLab.get(getActivity()).deleteCrimes();
                 updateUI();
                 return true;
             default:
