@@ -54,6 +54,15 @@ public class CrimeFragment extends Fragment {
         mCrime = CrimeLab.get(getActivity()).getCrime(crimeId);
     }
 
+    //用 可能会在CrimeFragment中修改Crime实例。修改完成后，我们 要 新CrimeLab中的
+    //Crime  。这可  过在CrimeFragment.java中  CrimeFragment.onPause() 法完成
+    @Override
+    public void onPause() {
+        super.onPause();
+        CrimeLab.get(getActivity())
+                .updateCrime(mCrime);
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
