@@ -61,6 +61,15 @@ public class CrimeLab {
     }
 
 
+    //删除指定id的数据
+
+    public void deleteCirmeById(Crime crime) {
+
+        mDatabase.delete(CrimeTable.NAME, CrimeTable
+                .Cols.UUID + "= ?", new String[]{crime.getId().toString()});
+    }
+
+
 
     //返回查询出来的所有crime对象
     private CrimeCursorWrapper queryCrime(String whereClause, String[] whereArgs) {

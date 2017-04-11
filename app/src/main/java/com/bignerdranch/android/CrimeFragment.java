@@ -51,6 +51,8 @@ public class CrimeFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        setHasOptionsMenu(true);
+
         UUID crimeId = (UUID) getArguments().getSerializable(ARG_CRIME_ID);
 
         //根绝actvity返回的id 获取指定id的crime对象
@@ -130,7 +132,9 @@ public class CrimeFragment extends Fragment {
             case R.id.menu_item_delete_crime:
                 //删除当前viewpage显示的crime
 
+                CrimeLab.get(getActivity()).deleteCirmeById(mCrime);
 
+                getActivity().finish();
 
                 return true;
 
