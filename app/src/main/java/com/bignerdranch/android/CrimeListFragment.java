@@ -1,5 +1,6 @@
 package com.bignerdranch.android;
 
+import android.app.LoaderManager;
 import android.content.Intent;
 import android.content.pm.ProviderInfo;
 import android.os.Bundle;
@@ -8,6 +9,7 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -54,13 +56,17 @@ public class CrimeListFragment extends Fragment {
         mCrimeRecyclerView = (RecyclerView)view.findViewById(R.id.crime_recycler_view);
         mCrimeRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        if (savedInstanceState != null) {
 
+        if (savedInstanceState != null) {
             mSubtitleVisible = savedInstanceState.getBoolean(SAVED_SUBTITLE_VISIBLE);
+
+            Log.i("huoqude zhi", String.valueOf(mSubtitleVisible));
         }
+
         updateUI();
         return view;
     }
+
 
     @Override
     public void onResume() {
@@ -100,7 +106,6 @@ public class CrimeListFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-
         outState.putBoolean(SAVED_SUBTITLE_VISIBLE, mSubtitleVisible);
     }
 
