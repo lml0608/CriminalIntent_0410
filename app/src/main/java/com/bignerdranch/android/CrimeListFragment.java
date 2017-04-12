@@ -4,6 +4,7 @@ import android.app.LoaderManager;
 import android.content.Intent;
 import android.content.pm.ProviderInfo;
 import android.os.Bundle;
+import android.preference.Preference;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
@@ -18,6 +19,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.TextView;
+
+import com.bignerdranch.android.database.PreferenceUtils;
 
 import org.w3c.dom.Text;
 
@@ -60,7 +63,6 @@ public class CrimeListFragment extends Fragment {
         if (savedInstanceState != null) {
             mSubtitleVisible = savedInstanceState.getBoolean(SAVED_SUBTITLE_VISIBLE);
 
-            Log.i("huoqude zhi", String.valueOf(mSubtitleVisible));
         }
 
         updateUI();
@@ -187,6 +189,7 @@ public class CrimeListFragment extends Fragment {
         inflater.inflate(R.menu.fragment_crime_list, menu);
 
         MenuItem subtitleItem = menu.findItem(R.id.menu_item_show_subtitle);
+
         if (mSubtitleVisible) {
 
             subtitleItem.setTitle(R.string.hide_subtitle);
