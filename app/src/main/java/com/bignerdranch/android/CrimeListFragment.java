@@ -208,8 +208,12 @@ public class CrimeListFragment extends Fragment {
                 //添加
                 Crime crime = new Crime();
                 CrimeLab.get(getActivity()).addCrime(crime);
+                Intent intent = CrimePagerActivity.newIntent(getActivity(), crime.getId());
 
-                updateUI();
+
+                startActivity(intent);
+
+                //updateUI();
                 return true;
             case R.id.menu_item_delete_crime:
                 CrimeLab.get(getActivity()).deleteCrimes();

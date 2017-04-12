@@ -2,12 +2,14 @@ package com.bignerdranch.android;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.ShareCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
@@ -31,6 +33,8 @@ import java.util.UUID;
 
 public class CrimeFragment extends Fragment {
 
+    private static final String TAG = "CrimeFragment";
+
     private static final String ARG_CRIME_ID = "crime_id";
 
     private static final int REQUEST_CONTACT = 1;
@@ -48,6 +52,7 @@ public class CrimeFragment extends Fragment {
      * @return
      */
     public static CrimeFragment newInstance(UUID crimeId) {
+
 
         Bundle args = new Bundle();
 
@@ -129,16 +134,19 @@ public class CrimeFragment extends Fragment {
         mReportButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //发送report
-                Intent intent = new Intent(Intent.ACTION_SEND);
-
-                intent.setType("text/plain");
-                intent.putExtra(Intent.EXTRA_TEXT, getCrimeReport());
-                intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.crime_report_subject));
-                intent = Intent.createChooser(intent, getString(R.string.send_report));
-                startActivity(intent);
+//                //发送report
+//                Intent intent = new Intent(Intent.ACTION_SEND);
+//
+//                intent.setType("text/plain");
+//                intent.putExtra(Intent.EXTRA_TEXT, getCrimeReport());
+//                intent.putExtra(Intent.EXTRA_SUBJECT, getString(R.string.crime_report_subject));
+//                intent = Intent.createChooser(intent, getString(R.string.send_report));
+//                startActivity(intent);
+                shareReport();
             }
         });
+
+
 
         final Intent pickContact = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
 
@@ -152,7 +160,26 @@ public class CrimeFragment extends Fragment {
             mSuspectButton.setText(mCrime.getSuspect());
         }
 
+
+        PackageManager packageManager = getActivity().getPackageManager();
+        if (packageManager.resolveActivity(pickContact,
+                PackageManager.MATCH_DEFAULT_ONLY) == null) {
+            mSuspectButton.setEnabled(false);
+        }
+
         return v;
+    }
+
+    private void shareReport() {
+        String mimeTtype = "text/plain";
+
+        ShareCompat.IntentBuilder
+                .from(getActivity())
+                .setType(mimeTtype)
+                .setSubject(getString(R.string.crime_report_subject))
+                .setChooserTitle(getString(R.string.send_report))
+                .setText(getCrimeReport())
+                .startChooser();
     }
 
     @Override
@@ -232,6 +259,10 @@ public class CrimeFragment extends Fragment {
 
                 CrimeLab.get(getActivity()).deleteCirmeById(mCrime);
 
+                Log.i(TAG, String.valueOf(ContactsContract.CommonDataKinds.Phone.CONTENT_URI));
+                //ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME   display_name
+                Log.i(TAG, String.valueOf(ContactsContract.Contacts.CONTENT_URI));
+
                 getActivity().finish();
 
                 return true;
@@ -241,4 +272,6 @@ public class CrimeFragment extends Fragment {
         }
 
     }
+
+
 }
