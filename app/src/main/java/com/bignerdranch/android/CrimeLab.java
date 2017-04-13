@@ -4,12 +4,14 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.os.Environment;
 
 import com.bignerdranch.android.database.CrimeBaseHelper;
 import com.bignerdranch.android.database.CrimeCursorWrapper;
 import com.bignerdranch.android.database.CrimeDbSchema;
 import com.bignerdranch.android.database.CrimeDbSchema.CrimeTable;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -156,6 +158,19 @@ public class CrimeLab {
         mDatabase.update(CrimeTable.NAME, values,
                 CrimeTable.Cols.UUID + " = ?",
                 new String[]{uuidString});
+    }
+
+
+    //定位图片文件
+    public File getPhotoFile(Crime crime) {
+
+        File externalFilesDir = mContext.getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+
+        if (externalFilesDir == null) {
+            return null;
+        }
+        //返回文件
+        return new File(externalFilesDir, crime.getPhotoFilename());
     }
 
 

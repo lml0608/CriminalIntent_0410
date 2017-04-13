@@ -5,9 +5,11 @@ import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -29,8 +31,11 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.Toast;
 
+import java.io.File;
 import java.util.UUID;
 
 /**
@@ -45,6 +50,8 @@ public class CrimeFragment extends Fragment {
 
     private static final int REQUEST_CONTACT = 1;
 
+    private static final int REQUEST_PHOTO= 2;
+
     private Crime mCrime;
     private EditText mTitleField;
     private Button mDateButton;
@@ -52,6 +59,10 @@ public class CrimeFragment extends Fragment {
     private Button mReportButton;
     private Button mSuspectButton;
     private Button mCallButton;
+    private File mPhotoFile;
+    private ImageButton mPhotoButton;
+    private Bitmap mPhoto;
+    private ImageView mPhotoView;
 
     /**
      * 携带id传递
@@ -81,6 +92,10 @@ public class CrimeFragment extends Fragment {
 
         //根绝actvity返回的id 获取指定id的crime对象
         mCrime = CrimeLab.get(getActivity()).getCrime(crimeId);
+
+        //获取该Crime的图片文件
+        mPhotoFile = CrimeLab.get(getActivity())
+                .getPhotoFile(mCrime);
     }
 
     //用 可能会在CrimeFragment中修改Crime实例。修改完成后，我们 要 新CrimeLab中的
@@ -197,8 +212,40 @@ public class CrimeFragment extends Fragment {
             }
         });
 
+        mPhotoButton = (ImageButton)v.findViewById(R.id.crime_camera);
+
+        final Intent captrueImage = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+        boolean canTakePhoto = mPhotoFile != null &&
+                captrueImage.resolveActivity(packageManager) != null;
+        mPhotoButton.setEnabled(canTakePhoto);
+        if (canTakePhoto) {
+            Uri uri = Uri.fromFile(mPhotoFile);
+            captrueImage.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+        }
+
+        mPhotoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivityForResult(captrueImage, REQUEST_PHOTO);
+            }
+        });
+
+        mPhotoView = (ImageView) v.findViewById(R.id.crime_photo);
+        updatePhotoView();
 
         return v;
+    }
+
+    private void updatePhotoView() {
+
+        if (mPhotoFile == null || !mPhotoFile.exists()) {
+
+            mPhotoView.setImageDrawable(null);
+        } else {
+            Bitmap bitmap = PictureUtils.getScaledBitmap(mPhotoFile.getPath(),getActivity());
+            mPhotoView.setImageBitmap(bitmap);
+        }
     }
 
     //拨打电话
@@ -285,6 +332,10 @@ public class CrimeFragment extends Fragment {
             } finally {
                 c.close();
             }
+        } else if (requestCode == REQUEST_PHOTO) {
+
+            updatePhotoView();
+
         }
     }
 
