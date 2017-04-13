@@ -1,5 +1,6 @@
 package com.bignerdranch.android;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -7,10 +8,14 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.ShareCompat;
+import android.support.v4.content.ContextCompat;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.format.DateFormat;
 import android.util.Log;
@@ -24,6 +29,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import java.util.UUID;
 
@@ -45,9 +51,11 @@ public class CrimeFragment extends Fragment {
     private CheckBox mSolvedCheckBox;
     private Button mReportButton;
     private Button mSuspectButton;
+    private Button mCallButton;
 
     /**
      * 携带id传递
+     *
      * @param crimeId
      * @return
      */
@@ -91,11 +99,11 @@ public class CrimeFragment extends Fragment {
         View v = inflater.inflate(R.layout.fragment_crime, container, false);
 
         //控件
-        mTitleField = (EditText)v.findViewById(R.id.crime_title);
-        mDateButton = (Button)v.findViewById(R.id.crime_date);
-        mSolvedCheckBox = (CheckBox)v.findViewById(R.id.crime_solved);
-        mSuspectButton = (Button)v.findViewById(R.id.crime_suspect);
-        mReportButton = (Button)v.findViewById(R.id.crime_report);
+        mTitleField = (EditText) v.findViewById(R.id.crime_title);
+        mDateButton = (Button) v.findViewById(R.id.crime_date);
+        mSolvedCheckBox = (CheckBox) v.findViewById(R.id.crime_solved);
+        mSuspectButton = (Button) v.findViewById(R.id.crime_suspect);
+        mReportButton = (Button) v.findViewById(R.id.crime_report);
         //设置控件的值
         mTitleField.setText(mCrime.getTitle());
         //输入框
@@ -147,7 +155,6 @@ public class CrimeFragment extends Fragment {
         });
 
 
-
         final Intent pickContact = new Intent(Intent.ACTION_PICK, ContactsContract.Contacts.CONTENT_URI);
 
         mSuspectButton.setOnClickListener(new View.OnClickListener() {
@@ -167,7 +174,76 @@ public class CrimeFragment extends Fragment {
             mSuspectButton.setEnabled(false);
         }
 
+
+        mCallButton = (Button) v.findViewById(R.id.crime_call);
+
+        mCallButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //拨打电话 action_dial
+
+                if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.READ_CONTACTS)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    requestPermissions(new String[]{Manifest.permission.READ_CONTACTS}, 0);
+                } else {
+                    String phoneNumber = getphone(mCrime.getSuspect());
+
+                    callCrime(phoneNumber);
+
+                    Log.i(TAG, "phoneNumber = " + phoneNumber);
+                }
+
+
+            }
+        });
+
+
         return v;
+    }
+
+    //拨打电话
+    private void callCrime( String number) {
+
+        Intent i = new Intent(Intent.ACTION_DIAL);
+
+        i.setData(Uri.parse("tel:" + number));
+
+        startActivity(i);
+
+
+    }
+
+    //查询电话号码
+
+    private String getphone(String name) {
+
+        String phoneNumber = null;
+        if (name != null) {
+
+
+            //使用ContentResolver查找联系人数据
+            Cursor cursor = getActivity().getContentResolver().query(ContactsContract.Contacts.CONTENT_URI, null, null, null, null);
+            //遍历查询结果，找到所需号码
+            while (cursor.moveToNext()) {
+                //获取联系人ID
+                String contactId = cursor.getString(cursor.getColumnIndex(ContactsContract.Contacts._ID));
+                //获取联系人的名字
+                String contactName = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+                if (name.equals(contactName)) {
+                    //使用ContentResolver查找联系人的电话号码
+                    Cursor phone = getActivity().getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, ContactsContract.CommonDataKinds.Phone.CONTACT_ID + " = " + contactId, null, null);
+                    if (phone.moveToNext()) {
+                        phoneNumber = phone.getString(phone.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+                        Log.d(TAG, "电话：" + phoneNumber);
+                        break;
+                    }
+                }
+            }
+            return phoneNumber;
+        }
+
+        return null;
+
     }
 
     private void shareReport() {
@@ -193,9 +269,9 @@ public class CrimeFragment extends Fragment {
             Uri contactUri = data.getData();
 
             Log.i("CrimeFragment", String.valueOf(contactUri));
-            String[] queryFields = new String[] {ContactsContract.Contacts.DISPLAY_NAME};
+            String[] queryFields = new String[]{ContactsContract.Contacts.DISPLAY_NAME};
 
-            Cursor c = getActivity().getContentResolver().query(contactUri, queryFields, null,null,null);
+            Cursor c = getActivity().getContentResolver().query(contactUri, queryFields, null, null, null);
 
             try {
 
@@ -206,7 +282,7 @@ public class CrimeFragment extends Fragment {
                 String suspect = c.getString(0);
                 mCrime.setSuspect(suspect);
                 mSuspectButton.setText(suspect);
-            }finally {
+            } finally {
                 c.close();
             }
         }
@@ -220,7 +296,7 @@ public class CrimeFragment extends Fragment {
 
             solvedString = getString(R.string.crime_report_solved);
 
-        }else {
+        } else {
             solvedString = getString(R.string.crime_report_unsolved);
         }
 
@@ -259,10 +335,6 @@ public class CrimeFragment extends Fragment {
 
                 CrimeLab.get(getActivity()).deleteCirmeById(mCrime);
 
-                Log.i(TAG, String.valueOf(ContactsContract.CommonDataKinds.Phone.CONTENT_URI));
-                //ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME   display_name
-                Log.i(TAG, String.valueOf(ContactsContract.Contacts.CONTENT_URI));
-
                 getActivity().finish();
 
                 return true;
@@ -273,5 +345,22 @@ public class CrimeFragment extends Fragment {
 
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
+        if (requestCode == 0) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+                String phoneNumber = getphone(mCrime.getSuspect());
+
+                callCrime(phoneNumber);
+
+                Log.i(TAG, "phoneNumber = " + phoneNumber);
+
+            } else {
+
+                Toast.makeText(getActivity(), "没有授权不能使用！", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
 }
