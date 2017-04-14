@@ -23,6 +23,12 @@ public class CrimeListActivity extends SignleFragmentActivity {
     }
 
     @Override
+    protected int getLayoutResId() {
+        //return R.layout.activity_twopane;//双版面
+        return R.layout.activity_masterdetail;//使用别名，refs.xml 单版面
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
 

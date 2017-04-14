@@ -1,6 +1,7 @@
 package com.bignerdranch.android;
 
 import android.os.Bundle;
+import android.support.annotation.LayoutRes;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -14,10 +15,18 @@ public abstract class SignleFragmentActivity extends AppCompatActivity {
     //用来创建fragment对象
     protected  abstract Fragment createFragment();
 
+    //返回布局，@LayoutRes任何时候都应该返回有效的布局资源id
+    @LayoutRes
+    protected int getLayoutResId() {
+
+        return R.layout.activity_fragment;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_fragment);
+        //setContentView(R.layout.activity_fragment);
+        setContentView(getLayoutResId());
 
         //获取Fragment管理者对象
         FragmentManager fm = getSupportFragmentManager();

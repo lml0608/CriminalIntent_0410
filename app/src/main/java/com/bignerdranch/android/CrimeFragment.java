@@ -96,6 +96,9 @@ public class CrimeFragment extends Fragment {
         //获取该Crime的图片文件
         mPhotoFile = CrimeLab.get(getActivity())
                 .getPhotoFile(mCrime);
+        ///storage/0403-0201/Android/data/com.bignerdranch.android/files/Pictures/IMG_47cf76b4-4ba9-41fc-8d18-cc68531fd0b2.jpg
+
+        Log.i(TAG, "图片=" + mPhotoFile);
     }
 
     //用 可能会在CrimeFragment中修改Crime实例。修改完成后，我们 要 新CrimeLab中的
