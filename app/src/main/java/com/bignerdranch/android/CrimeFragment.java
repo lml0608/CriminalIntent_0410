@@ -64,6 +64,15 @@ public class CrimeFragment extends Fragment {
     private Bitmap mPhoto;
     private ImageView mPhotoView;
 
+    private Callbacks mCallbacks;
+
+    public interface Callbacks {
+
+        void onCrimeUpdated(Crime crime);
+    }
+
+
+
     /**
      * 携带id传递
      *
@@ -80,6 +89,12 @@ public class CrimeFragment extends Fragment {
         CrimeFragment fragment = new CrimeFragment();
         fragment.setArguments(args);
         return fragment;
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        mCallbacks = (Callbacks) activity;
     }
 
     @Override
@@ -110,6 +125,11 @@ public class CrimeFragment extends Fragment {
                 .updateCrime(mCrime);
     }
 
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallbacks = null;
+    }
 
     @Nullable
     @Override
@@ -136,6 +156,7 @@ public class CrimeFragment extends Fragment {
                 //mTitleField内容发生改变时
                 //设置crime对象的title值为mTitleField控件内容
                 mCrime.setTitle(s.toString());
+                updateCrime();
             }
 
             @Override
@@ -154,6 +175,7 @@ public class CrimeFragment extends Fragment {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 mCrime.setSolved(isChecked);
+                updateCrime();
             }
         });
 
@@ -331,16 +353,27 @@ public class CrimeFragment extends Fragment {
                 c.moveToFirst();
                 String suspect = c.getString(0);
                 mCrime.setSuspect(suspect);
+                updateCrime();
                 mSuspectButton.setText(suspect);
             } finally {
                 c.close();
             }
         } else if (requestCode == REQUEST_PHOTO) {
-
+            updateCrime();
             updatePhotoView();
+
 
         }
     }
+
+    private void updateCrime() {
+
+        CrimeLab.get(getActivity())
+                .updateCrime(mCrime);
+
+        mCallbacks.onCrimeUpdated(mCrime);
+    }
+
 
     private String getCrimeReport() {
 

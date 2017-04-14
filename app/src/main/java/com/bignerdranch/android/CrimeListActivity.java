@@ -11,7 +11,7 @@ import android.util.Log;
 
 //implements CrimeListFragment.Callbacks 并实现接口的方法
 public class CrimeListActivity extends SignleFragmentActivity
-    implements CrimeListFragment.Callbacks{
+    implements CrimeListFragment.Callbacks, CrimeFragment.Callbacks{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,5 +55,13 @@ public class CrimeListActivity extends SignleFragmentActivity
                     .commit();
         }
 
+    }
+
+    @Override
+    public void onCrimeUpdated(Crime crime) {
+
+        CrimeListFragment listFragment = (CrimeListFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.fragment_container);
+        listFragment.updateUI();
     }
 }
