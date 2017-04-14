@@ -1,6 +1,8 @@
 package com.bignerdranch.android;
 
+import android.app.Activity;
 import android.app.LoaderManager;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ProviderInfo;
 import android.os.Bundle;
@@ -43,6 +45,28 @@ public class CrimeListFragment extends Fragment {
     private CrimeAdapter mCrimeAdapter;
 
     private boolean mSubtitleVisible;
+
+    //mCallbacks
+    private Callbacks mCallbacks;
+
+    /**
+     * 定义接口，方法。当条目被选择时的行为
+     */
+    public interface Callbacks {
+
+        void onCrimeSelected(Crime crime);
+    }
+
+    //Fragment与Activity发生关联时调用
+    //CrimeListFragment就将 管activity 制  为了CrimeList- Fragment.Callbacks对 。这意  ， 管activity  实现CrimeListFragment. Callbacks   。这并非是不 的    ，但  下 非常 要。
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        mCallbacks = (Callbacks) activity;// 把该Activity当成Callbacks对象
+    }
+
+
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -112,6 +136,13 @@ public class CrimeListFragment extends Fragment {
         outState.putBoolean(SAVED_SUBTITLE_VISIBLE, mSubtitleVisible);
     }
 
+    //当fragment从activity移除的时候
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mCallbacks = null;
+    }
+
     //CrimeHolder
     private class CrimeHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         private Crime mCrime;
@@ -139,10 +170,11 @@ public class CrimeListFragment extends Fragment {
 
             mLastAdapterClickPosition = getAdapterPosition();
             //跳转到详情页， intent需要传递id
-            Intent intent = CrimePagerActivity.newIntent(getActivity(), mCrime.getId());
-
-
-            startActivity(intent);
+//            Intent intent = CrimePagerActivity.newIntent(getActivity(), mCrime.getId());
+//
+//
+//            startActivity(intent);
+            mCallbacks.onCrimeSelected(mCrime);
 
         }
     }
@@ -208,12 +240,15 @@ public class CrimeListFragment extends Fragment {
                 //添加
                 Crime crime = new Crime();
                 CrimeLab.get(getActivity()).addCrime(crime);
-                Intent intent = CrimePagerActivity.newIntent(getActivity(), crime.getId());
+                //Intent intent = CrimePagerActivity.newIntent(getActivity(), crime.getId());
 
 
-                startActivity(intent);
+                //startActivity(intent);
 
-                //updateUI();
+
+                updateUI();
+
+                mCallbacks.onCrimeSelected(crime);
                 return true;
             case R.id.menu_item_delete_crime:
                 CrimeLab.get(getActivity()).deleteCrimes();

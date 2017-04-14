@@ -1,5 +1,6 @@
 package com.bignerdranch.android;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -8,7 +9,9 @@ import android.util.Log;
  * Created by lfs-ios on 2017/4/10.
  */
 
-public class CrimeListActivity extends SignleFragmentActivity {
+//implements CrimeListFragment.Callbacks 并实现接口的方法
+public class CrimeListActivity extends SignleFragmentActivity
+    implements CrimeListFragment.Callbacks{
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,5 +36,24 @@ public class CrimeListActivity extends SignleFragmentActivity {
         super.onDestroy();
 
         Log.i("CrimeListActivity", "销毁");
+    }
+
+    //实现接口中的方法
+
+    @Override
+    public void onCrimeSelected(Crime crime) {
+        if (findViewById(R.id.detail_fragment_container) == null) {
+
+            Intent intent = CrimePagerActivity.newIntent(this, crime.getId());
+            startActivity(intent);
+        } else {
+
+            Fragment newDetail = CrimeFragment.newInstance(crime.getId());
+
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.detail_fragment_container, newDetail)
+                    .commit();
+        }
+
     }
 }
